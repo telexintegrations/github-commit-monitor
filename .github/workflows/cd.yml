@@ -33,7 +33,7 @@ jobs:
           echo "Starting deployment..."
           
           # Navigate to project directory
-          cd /home/$USERNAME/telex-commit-integration
+          cd /home/$USERNAME/telex-commit-intergration
           
           # Create .env file with environment variables
           echo "MY_GITHUB_SECRET=${MY_GITHUB_SECRET}" > .env
