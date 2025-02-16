@@ -24,37 +24,23 @@ jobs:
         pip install -r requirements.txt
 
     - name: Deploy to EC2
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        PAT: ${{ secrets.PAT }}
-        SERVER_IP: ${{ secrets.SERVER_IP }}
-        USERNAME: ${{ secrets.USERNAME }}
-        MY_GITHUB_SECRET: ${{ secrets.MY_GITHUB_SECRET }}
-        CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
-      run: |
-        # Write the SSH private key and remove Windows line endings
-        echo "$SSH_PRIVATE_KEY" > private_key
-        sed -i 's/\r$//' private_key
-        chmod 600 private_key
-        
-        # Test SSH connection with more verbose output
-        ssh -vvv -i private_key -o StrictHostKeyChecking=no $USERNAME@$SERVER_IP 'echo "SSH Connection Test"'
-
-        # Copy files to EC2
-        scp -v -i private_key -o StrictHostKeyChecking=no \
-          docker-compose.yml \
-          Dockerfile \
-          nginx.conf \
-          requirements.txt \
-          app.py \
-          $USERNAME@$SERVER_IP:/home/$USERNAME/telex-commit-integration/
-        
-        # Deploy using Docker Compose
-        ssh -i private_key -o StrictHostKeyChecking=no $USERNAME@$SERVER_IP '
-          cd /home/$USERNAME/telex-commit-integration && \
-          echo "MY_GITHUB_SECRET=${MY_GITHUB_SECRET}" > .env && \
-          echo "CHANNEL_ID=${CHANNEL_ID}" >> .env && \
-          chmod 600 .env && \
-          sudo docker-compose down && \
-          sudo docker-compose up --build -d && \
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        username: ${{ secrets.USERNAME }}
+        script: |
+          echo "Starting deployment..."
+          
+          # Navigate to project directory
+          cd /home/$USERNAME/telex-commit-integration
+          
+          # Create .env file with environment variables
+          echo "MY_GITHUB_SECRET=${MY_GITHUB_SECRET}" > .env
+          echo "CHANNEL_ID=${CHANNEL_ID}" >> .env
+          chmod 600 .env
+          
+          # Deploy using Docker Compose
+          sudo docker-compose down
+          sudo docker-compose up --build -d
           sudo docker system prune -f
