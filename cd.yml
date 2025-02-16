@@ -1,0 +1,54 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main  
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Deploy to EC2
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        SERVER_IP: ${{ secrets.SERVER_IP }}
+        USERNAME: ${{ secrets.USERNAME }}
+        GITHUB_SECRET: ${{ secrets.GITHUB_SECRET }}
+        CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
+      run: |
+        echo "$SSH_PRIVATE_KEY" > private_key
+        chmod 600 private_key
+        
+        # Copy files to EC2
+        scp -i private_key -o StrictHostKeyChecking=no \
+          docker-compose.yml \
+          Dockerfile \
+          nginx.conf \
+          requirements.txt \
+          app.py \
+          $USERNAME@$SERVER_IP:/home/$USERNAME/telex-commit-integration/
+        
+        # Deploy using Docker Compose
+        ssh -i private_key -o StrictHostKeyChecking=no $USERNAME@$SERVER_IP '
+          cd /home/$USERNAME/telex-commit-integration && \
+          echo "GITHUB_SECRET=${GITHUB_SECRET}" > .env && \
+          echo "CHANNEL_ID=${CHANNEL_ID}" >> .env && \
+          sudo docker-compose down && \
+          sudo docker-compose up --build -d && \
+          sudo docker system prune -f
+        '
