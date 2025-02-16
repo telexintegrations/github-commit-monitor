@@ -37,8 +37,11 @@ jobs:
         sed -i 's/\r$//' private_key
         chmod 600 private_key
         
+        # Test SSH connection with more verbose output
+        ssh -vvv -i private_key -o StrictHostKeyChecking=no $USERNAME@$SERVER_IP 'echo "SSH Connection Test"'
+
         # Copy files to EC2
-        scp -i private_key -o StrictHostKeyChecking=no \
+        scp -v -i private_key -o StrictHostKeyChecking=no \
           docker-compose.yml \
           Dockerfile \
           nginx.conf \
