@@ -25,13 +25,16 @@ jobs:
 
     - name: Deploy to EC2
       env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         PAT: ${{ secrets.PAT }}
         SERVER_IP: ${{ secrets.SERVER_IP }}
         USERNAME: ${{ secrets.USERNAME }}
         MY_GITHUB_SECRET: ${{ secrets.MY_GITHUB_SECRET }}
         CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
       run: |
+        # Write the SSH private key and remove Windows line endings
         echo "$SSH_PRIVATE_KEY" > private_key
+        sed -i 's/\r$//' private_key
         chmod 600 private_key
         
         # Copy files to EC2
