@@ -28,7 +28,7 @@ jobs:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         SERVER_IP: ${{ secrets.SERVER_IP }}
         USERNAME: ${{ secrets.USERNAME }}
-        GITHUB_SECRET: ${{ secrets.GITHUB_SECRET }}
+        GITHUB_SECRET: ${{ secrets.MY_GITHUB_SECRET }}
         CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
       run: |
         echo "$SSH_PRIVATE_KEY" > private_key
@@ -46,7 +46,7 @@ jobs:
         # Deploy using Docker Compose
         ssh -i private_key -o StrictHostKeyChecking=no $USERNAME@$SERVER_IP '
           cd /home/$USERNAME/telex-commit-integration && \
-          echo "GITHUB_SECRET=${GITHUB_SECRET}" > .env && \
+          echo "GITHUB_SECRET=${MY_GITHUB_SECRET}" > .env && \
           echo "CHANNEL_ID=${CHANNEL_ID}" >> .env && \
           sudo docker-compose down && \
           sudo docker-compose up --build -d && \
