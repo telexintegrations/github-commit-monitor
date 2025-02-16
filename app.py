@@ -5,6 +5,11 @@ import hmac
 import hashlib
 from dotenv import load_dotenv
 import os
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv()
@@ -14,7 +19,7 @@ CORS(app, resources={r"/*": {"origins": ["https://telex.im", "https://staging.te
 
 # Telex API Configuration
 TELEX_API_URL = "https://ping.telex.im/v1/webhooks/{channel_id}"
-GITHUB_SECRET = os.getenv("GITHUB_SECRET")
+GITHUB_SECRET = os.getenv("MY_GITHUB_SECRET")
 CHANNEL_ID = os.getenv("CHANNEL_ID")
 
 # Verify GitHub Webhook Signature
@@ -27,8 +32,17 @@ def verify_signature(payload, signature):
 @app.route("/github-webhook", methods=["POST"])
 def github_webhook():
     try:
+        # # Verify GitHub signature
+        # signature = request.headers.get("X-Hub-Signature-256", "")
+        # if not verify_signature(request.data, signature):
+        #     return jsonify({"error": "Unauthorized"}), 401
+
         # Verify GitHub signature
+        # GitHub sends webhook with signature
         signature = request.headers.get("X-Hub-Signature-256", "")
+        logger.info(f"Received signature: {signature}")
+
+        # 2. Server verifies if signature is from GitHub
         if not verify_signature(request.data, signature):
             return jsonify({"error": "Unauthorized"}), 401
 
@@ -39,15 +53,24 @@ def github_webhook():
         repo_name = payload["repository"]["name"]
 
         # Format message for Telex
-        telex_message = f"🚀 New commit in *{repo_name}* by **{author}**: `{commit_message}`"
+        telex_payload = {
+            "event_name": "GitHub Commit",
+            "message": f"🚀 New commit in {repo_name} by {author}: {commit_message}",
+            "status": "success",
+            "username": author
+        }
 
         # Send to Telex
         response = requests.post(
             TELEX_API_URL.format(channel_id=CHANNEL_ID),
-            json={"text": telex_message}
+            json=telex_payload,
+            headers={
+                "accept": "application/json",
+                "Content-Type": "application/json"
+            }
         )
 
-        if response.status_code != 200:
+        if response.status_code != 202:  # Telex returns 202 for success
             return jsonify({"error": "Failed to send message to Telex"}), response.status_code
 
         return jsonify({"status": "success"}), 200
@@ -66,7 +89,7 @@ def get_integration_json():
                 "app_description": "Tracks commits and sends notifications to Telex.",
                 "app_logo": "https://i.imgur.com/bRoRB1Y.png",
                 "app_url": base_url,
-                "background_color": "#fff",
+                "background_color": "#ffffff",
             },
             "is_active": True,
             "integration_type": "modifier",
@@ -87,5 +110,12 @@ def get_integration_json():
     }
     return jsonify(integration_json)
 
+@app.errorhandler(405)
+def method_not_allowed(e):
+    return jsonify({
+        "error": "Method not allowed. This endpoint only accepts POST requests.",
+        "allowed_methods": ["POST"]
+    }), 405
+
 if __name__ == "__main__":
-    app.run(port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000)  
