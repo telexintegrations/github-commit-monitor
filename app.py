@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": ["https://telex.im", "https://staging.telex.im", "http://telextest.im", "http://staging.telextest.im"]}})
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Telex API Configuration
 TELEX_API_URL = "https://ping.telex.im/v1/webhooks/{channel_id}"
