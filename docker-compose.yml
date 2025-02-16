@@ -4,7 +4,7 @@ services:
     expose:
       - "5000"  # Only visible within Docker network
     environment:
-      - GITHUB_SECRET=${GITHUB_SECRET}
+      - GITHUB_SECRET=${MY_GITHUB_SECRET}
       - CHANNEL_ID=${CHANNEL_ID}
     networks:
       - app-network
