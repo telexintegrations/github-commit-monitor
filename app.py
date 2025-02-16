@@ -110,6 +110,16 @@ def get_integration_json():
     }
     return jsonify(integration_json)
 
+# Health Check endpoint
+@app.route("/health", methods=["GET"])
+def health_check():
+    return jsonify({"status": "healthy"}), 200
+
+# Root URL endpoint
+@app.route("/", methods=["GET"])
+def root():
+    return jsonify({"message": "Welcome to the GitHub Commit Tracker API"}), 200
+
 @app.errorhandler(405)
 def method_not_allowed(e):
     return jsonify({
