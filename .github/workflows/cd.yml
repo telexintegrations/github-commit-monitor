@@ -33,7 +33,7 @@ jobs:
           echo "Starting deployment..."
           
           # Navigate to project directory
-          cd /home/$USERNAME/telex-commit-intergration
+          cd /home/${{ secrets.USERNAME }}/telex-commit-integration
           
           # Fetch and reset to main
           echo "Fetching latest changes..."
@@ -42,11 +42,13 @@ jobs:
           git reset --hard origin/main
 
           # Create .env file with environment variables
-          echo "MY_GITHUB_SECRET=${MY_GITHUB_SECRET}" > .env
-          echo "CHANNEL_ID=${CHANNEL_ID}" >> .env
+          echo "MY_GITHUB_SECRET=${{ secrets.MY_GITHUB_SECRET }}" > .env
+          echo "CHANNEL_ID=${{ secrets.CHANNEL_ID }}" >> .env
           chmod 600 .env
           
           # Deploy using Docker Compose
           sudo docker-compose down
           sudo docker-compose up --build -d
           sudo docker system prune -f
+
+          
