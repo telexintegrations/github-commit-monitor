@@ -32,6 +32,10 @@ def verify_signature(payload, signature):
 @app.route("/github-webhook", methods=["POST"])
 def github_webhook():
     try:
+        logger.info("Received webhook payload")
+        logger.info(f"Headers: {request.headers}")
+        logger.info(f"Payload: {request.json}")
+
         # # Verify GitHub signature
         # signature = request.headers.get("X-Hub-Signature-256", "")
         # if not verify_signature(request.data, signature):
@@ -60,7 +64,8 @@ def github_webhook():
             "username": author
         }
 
-        # Send to Telex
+        # Send to Telex with logging
+        logger.info(f"Sending to Telex: {telex_payload}")
         response = requests.post(
             TELEX_API_URL.format(channel_id=CHANNEL_ID),
             json=telex_payload,
@@ -69,6 +74,8 @@ def github_webhook():
                 "Content-Type": "application/json"
             }
         )
+
+        logger.info(f"Telex response: {response.status_code} - {response.text}")
 
         if response.status_code != 202:  # Telex returns 202 for success
             return jsonify({"error": "Failed to send message to Telex"}), response.status_code
