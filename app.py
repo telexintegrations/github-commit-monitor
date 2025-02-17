@@ -15,7 +15,19 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+allowed_origins = [
+    "https://telex.im",
+    "https://staging.telex.im",
+    "http://telextest.im",
+    "http://staging.telextest.im"
+]
+
+CORS(app, resources={
+    r"/*": {
+        "origins": allowed_origins,
+        "supports_credentials": True
+    }
+})
 
 # Telex API Configuration
 TELEX_API_URL = "https://ping.telex.im/v1/webhooks/{channel_id}"
@@ -48,6 +60,7 @@ def github_webhook():
 
         # 2. Server verifies if signature is from GitHub
         if not verify_signature(request.data, signature):
+            logger.error("Signature verification failed")
             return jsonify({"error": "Unauthorized"}), 401
 
         # Parse GitHub payload
@@ -59,7 +72,7 @@ def github_webhook():
         # Format message for Telex
         telex_payload = {
             "event_name": "GitHub Commit",
-            "message": f"🚀 New commit in {repo_name} by {author}: {commit_message}",
+            "message": f" 🎉 New commit in {repo_name} by {author}: {commit_message}",
             "status": "success",
             "username": author
         }
@@ -87,19 +100,20 @@ def github_webhook():
 # Integration JSON endpoint
 @app.route("/integration.json", methods=["GET"])
 def get_integration_json():
-    base_url = request.url_root.rstrip("/")
+    base_url = f"{request.scheme}://{request.host}"
+    current_date = datetime.now().strftime("%Y-%m-%d")
     integration_json = {
         "data": {
-            "date": {"created_at": "2025-02-15", "updated_at": "2025-02-15"},
+            "date": {"created_at": current_date, "updated_at": current_date},
             "descriptions": {
                 "app_name": "GitHub Commit Tracker",
                 "app_description": "Tracks commits and sends notifications to Telex.",
-                "app_logo": "https://i.imgur.com/bRoRB1Y.png",
+                "app_logo": "",
                 "app_url": base_url,
                 "background_color": "#ffffff",
             },
             "is_active": True,
-            "integration_type": "modifier",
+            "integration_type": "output",
             "key_features": [
                 "Tracks GitHub commits and sends notifications to Telex",
                 "Provides real-time updates",
