@@ -35,6 +35,12 @@ jobs:
           # Navigate to project directory
           cd /home/$USERNAME/telex-commit-intergration
           
+          # Fetch and reset to main
+          echo "Fetching latest changes..."
+          git fetch origin main
+          echo "Resetting to origin/main..."
+          git reset --hard origin/main
+
           # Create .env file with environment variables
           echo "MY_GITHUB_SECRET=${MY_GITHUB_SECRET}" > .env
           echo "CHANNEL_ID=${CHANNEL_ID}" >> .env
