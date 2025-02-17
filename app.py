@@ -100,12 +100,12 @@ def github_webhook():
 # Integration JSON endpoint
 @app.route("/integration.json", methods=["GET"])
 def get_integration_json():
-    base_url = f"{request.scheme}://{request.host}"
-    current_date = datetime.now().strftime("%Y-%m-%d")
+    base_url = request.url_root.rstrip('/')
     integration_json = {
         "data": {
-            "date": {"created_at": current_date, "updated_at": current_date},
-            "descriptions": {
+                "created_at": "2025-02-17",  
+        "updated_at": "2025-02-17",
+        "description": {
                 "app_name": "GitHub Commit Tracker",
                 "app_description": "Tracks commits and sends notifications to Telex.",
                 "app_logo": "",
