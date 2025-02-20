@@ -105,35 +105,37 @@ def get_integration_json():
     base_url = os.environ.get('APP_URL', request.url_root.rstrip('/'))
     integration_json = {
         "data": {
-                "created_at": "2025-02-17",  
-        "updated_at": "2025-02-17",
-        "description": {
-                "app_name": "GitHub Commit Tracker",
-                "app_description": "Tracks commits and sends notifications to Telex.",
-                "app_logo": "",
-                "app_url": base_url,
-                "background_color": "#ffffff",
+            "date": {
+            "created_at": "2025-02-20",
+            "updated_at": "2025-02-20"
             },
-            "is_active": True,
-            "integration_type": "output",
-            "key_features": [
-                "Tracks GitHub commits and sends notifications to Telex",
-                "Provides real-time updates",
-                "Easy integration with GitHub",
-                "Customizable notifications"
-            ],
-            "integration_category": "Development & Code Management",
-            "author": "Cynthia Wahome",
-            "website": base_url,
-            "settings": [
-                {
-                "label": "webhook-slug", 
-                "type": "text", 
-                "required": True, 
-                "default": ""
-                },
-            ],
-            "target_url": f"{base_url}/github-webhook",
+        "descriptions": {
+            "app_name": "GitHub Commit Tracker",
+            "app_description": "Tracks commits and sends notifications to Telex.",
+            "app_logo": "https://cdn-icons-png.flaticon.com/512/6577/6577286.png",
+            "app_url": "https://github-commit-monitor-4a53c549b932.herokuapp.com",
+            "background_color": "#ffffff",
+        },
+        "is_active": True,
+        "integration_type": "output",
+        "integration_category": "Development & Code Management",
+        "key_features": [
+            "Tracks GitHub commits and sends notifications to Telex",
+            "Provides real-time updates",
+            "Easy integration with GitHub",
+            "Customizable notifications"
+        ],
+        "author": "Cynthia Wahome",
+        "settings": [
+            {
+                "label": "webhook-slug",
+                "type": "text",
+                "required": true,
+                "default": "True"
+            }
+        ],
+        "target_url": f"{base_url}/github-webhook",
+        "tick_url": "https://github-commit-monitor-4a53c549b932.herokuapp.com"
         }
     }
     return jsonify(integration_json)
