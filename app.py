@@ -102,7 +102,7 @@ def github_webhook():
 # Integration JSON endpoint
 @app.route("/integration.json", methods=["GET"])
 def get_integration_json():
-    base_url = os.environ.get('APP_URL', request.url_root.rstrip('/'))
+    # base_url = os.environ.get('APP_URL', request.url_root.rstrip('/'))
     integration_json = {
         "data": {
             "date": {
@@ -134,7 +134,7 @@ def get_integration_json():
                 "default": "True"
             }
         ],
-        "target_url": f"{base_url}/github-webhook",
+        "target_url": https://github-commit-monitor-4a53c549b932.herokuapp.com/github-webhook",
         "tick_url": "https://github-commit-monitor-4a53c549b932.herokuapp.com"
         }
     }
