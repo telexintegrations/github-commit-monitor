@@ -29,6 +29,8 @@ CORS(app, resources={
     }
 })
 
+
+
 # Telex API Configuration
 TELEX_API_URL = "https://ping.telex.im/v1/webhooks/{channel_id}"
 GITHUB_SECRET = os.getenv("MY_GITHUB_SECRET")
@@ -100,7 +102,7 @@ def github_webhook():
 # Integration JSON endpoint
 @app.route("/integration.json", methods=["GET"])
 def get_integration_json():
-    base_url = request.url_root.rstrip('/')
+    base_url = os.environ.get('APP_URL', request.url_root.rstrip('/'))
     integration_json = {
         "data": {
                 "created_at": "2025-02-17",  
@@ -124,7 +126,12 @@ def get_integration_json():
             "author": "Cynthia Wahome",
             "website": base_url,
             "settings": [
-                {"label": "webhook-slug", "type": "text", "required": True, "default": ""},
+                {
+                "label": "webhook-slug", 
+                "type": "text", 
+                "required": True, 
+                "default": ""
+                },
             ],
             "target_url": f"{base_url}/github-webhook",
         }
@@ -149,4 +156,5 @@ def method_not_allowed(e):
     }), 405
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)  
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
