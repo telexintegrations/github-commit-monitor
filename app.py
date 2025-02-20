@@ -130,11 +130,11 @@ def get_integration_json():
             {
                 "label": "webhook-slug",
                 "type": "text",
-                "required": true,
+                "required": True,
                 "default": "True"
             }
         ],
-        "target_url": https://github-commit-monitor-4a53c549b932.herokuapp.com/github-webhook",
+        "target_url": "https://github-commit-monitor-4a53c549b932.herokuapp.com/github-webhook",
         "tick_url": "https://github-commit-monitor-4a53c549b932.herokuapp.com"
         }
     }
