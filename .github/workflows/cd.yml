@@ -1,54 +1,32 @@
-name: Deploy to EC2
+name: Deploy to Heroku
 
 on:
   push:
     branches:
-      - main  
+      - feature/heroku
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-
-    - name: Deploy to EC2
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.SERVER_IP }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        username: ${{ secrets.USERNAME }}
-        script: |
-          echo "Starting deployment..."
-          
-          # Navigate to project directory
-          cd /home/${{ secrets.USERNAME }}/telex-commit-integration
-          
-          # Fetch and reset to main
-          echo "Fetching latest changes..."
-          git fetch origin main
-          echo "Resetting to origin/main..."
-          git reset --hard origin/main
-
-          # Create .env file with environment variables
-          echo "MY_GITHUB_SECRET=${{ secrets.MY_GITHUB_SECRET }}" > .env
-          echo "CHANNEL_ID=${{ secrets.CHANNEL_ID }}" >> .env
-          chmod 600 .env
-          
-          # Deploy using Docker Compose
-          sudo docker-compose down
-          sudo docker-compose up --build -d
-          sudo docker system prune -f
-
-          
+      - uses: actions/checkout@v2
+      
+      - name: Login to Heroku Container Registry
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: heroku container:login
+      
+      - name: Build and push
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: |
+          heroku container:push web -a github-commit-monitor
+          heroku container:release web -a github-commit-monitor
+        
+      - name: Set environment variables
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: |
+          heroku config:set MY_GITHUB_SECRET=${{ secrets.MY_GITHUB_SECRET }} -a github-commit-monitor
+          heroku config:set CHANNEL_ID=${{ secrets.CHANNEL_ID }} -a github-commit-monitor
+          heroku config:set APP_URL=https://github-commit-monitor-4a53c549b932.herokuapp.com/ -a github-commit-monitor
