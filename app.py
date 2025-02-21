@@ -61,6 +61,11 @@ def github_webhook():
         logger.info(f"Received signature: {signature}")
 
         # 2. Server verifies if signature is from GitHub
+
+        if not signature:
+            logger.error("No signature provided")
+            return jsonify({"error": "No signature provided"}), 401
+            
         if not verify_signature(request.data, signature):
             logger.error("Signature verification failed")
             return jsonify({"error": "Unauthorized"}), 401
