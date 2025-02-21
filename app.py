@@ -65,10 +65,10 @@ def github_webhook():
         if not signature:
             logger.error("No signature provided")
             return jsonify({"error": "No signature provided"}), 401
-            
+
         if not verify_signature(request.data, signature):
             logger.error("Signature verification failed")
-            return jsonify({"error": "Unauthorized"}), 401
+            return jsonify({"error": "Invalid signature"}), 401
 
         # Parse GitHub payload
         payload = request.json
