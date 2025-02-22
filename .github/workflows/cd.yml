@@ -19,7 +19,11 @@ jobs:
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
 
-      # Remove container login and Docker build/push steps
+      - name: Add Heroku Remote
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: |
+          git remote add heroku https://heroku:$HEROKU_API_KEY@git.heroku.com/github-commit-monitor.git
 
       - name: Set Heroku stack to buildpack
         env:
